@@ -5,18 +5,7 @@ import FindId from "../../findid/FindId";
 import FindPw from "../../findpw/FindPw";
 
 function LoginBox() {
-  const navigate = useNavigate(); // navigate 훅 추가
-  const [id, setId] = useState("");
-  const [pw, setPw] = useState("");
-  const [error, setError] = useState({ id: false, pw: false });
 
-  const handleLogin = () => {
-    setError({ id: !id, pw: !pw });
-    if (id && pw) {
-      // 로그인 성공 시 ChooseType으로 이동
-      navigate("/chooseType"); // App.js에서 라우팅 필요
-    }
-  };
 
   return (
     <div
@@ -40,20 +29,20 @@ function LoginBox() {
           <div className={styles.loginmiddle}>
             <div className={styles.middleone}>
               <label htmlFor="iid" >아이디</label>
-              <input type="text" id="iid" placeholder="아이디" value={id} onChange={(e) => setId(e.target.value)}></input>  
+              <input type="text" id="iid" placeholder="아이디" ></input>  
             </div>
             <div className={styles.middletwo}>
               <label htmlFor="ppw">비밀번호</label> 
-              <input type="text" id="ppw" placeholder="비밀번호" value={pw} onChange={(e) => setPw(e.target.value)}></input>  
+              <input type="text" id="ppw" placeholder="비밀번호" ></input>  
             </div>
           </div>
 
           <div className={styles.loginbottom}>
-            <button className={styles.logbut} onClick={handleLogin}>로그인</button>
+            <button className={styles.logbut} >로그인</button>
           </div>
 
           <p className={styles.signup}>
-            회원이 아니신가요? <Link to="/signin">회원가입</Link>
+            회원이 아니신가요? <Link to="/signup">회원가입</Link>
           </p>
 
           <Link to="findid" className={styles.changelog}>
