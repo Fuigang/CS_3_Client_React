@@ -1,10 +1,11 @@
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import TotalChart from "./totalChart/TotalChart";
 import DetailChart from "./detailChart/DetailChart";
 import ChartInput from "./chartInput/ChartInput"; // 오른쪽 입력 폼 컴포넌트
 import styles from "./ChartIndex.module.css";
 import { FETAL_STANDARDS } from "./FetalStandardData";
+import { caxios } from "../../config/config";
 
 const ChartIndex = () => {
   // 상단 메뉴튼버튼
@@ -17,17 +18,13 @@ const ChartIndex = () => {
     "허벅지 길이",
   ];
 
-  const MOCK_ACTUAL_MEASUREMENTS = {
-    // EFW, HC, OFD, AC, FL 순서의 값들을 넣습니다.
-    28: { EFW: 1500, HC: 265.0, OFD: 95.0, AC: 235.0, FL: 57.0 }, // 28주 실측치
-    29: { EFW: 1850, HC: 275.0, OFD: 97.0, AC: 245.0, FL: 59.0 }, // 29주 실측치
-    // ... (다른 주차 데이터)
-  };
-
 
   const [currentWeek, setCurrentWeek] = useState(28);
   const [activeMenu, setActiveMenu] = useState(0);
 
+
+
+  const [actualData, setActualData] = useState(null);
   // 정적 표준 데이터
   const currentStandardData = useMemo(() => {
     // FETAL_STANDARDS에서 현재 주차의 Min/Avg/Max 데이터를 추출합니다.
@@ -36,10 +33,50 @@ const ChartIndex = () => {
 
   console.log(activeMenu);
   // 실제 입력 데이터
-  const currentActualData = useMemo(() => {
-    // MOCK 데이터에서 현재 주차의 아기 실제 측정 데이터를 추출합니다.
-    return MOCK_ACTUAL_MEASUREMENTS[currentWeek];
-  }, [currentWeek]);
+
+
+  //  2. 데이터 조회 비동기 로직 (caxios 사용)
+  useEffect(() => {
+    const fetchCurrentData = async () => {
+      setActualData(null); // 로딩 중 상태
+
+      try {
+        //  1. caxios.get 호출: 파라미터를 params 객체로 전달합니다.
+        const response = await caxios.get(`/api/fetal/measurement/current`, {
+          params: {
+            babyId: 1, //  실제 아기 ID로 대체해야 합니다.
+            week: currentWeek
+          }
+        });
+
+        const data = response.data;
+
+        // 2. 데이터가 없는 경우 처리 (API가 빈 객체 {} 를 반환했을 때)
+        if (!data || Object.keys(data).length === 0) {
+          setActualData({});
+          return;
+        }
+
+        // 3. 데이터 저장
+        setActualData(data);
+
+      } catch (error) {
+        //  4. Axios 오류 처리: 4xx/5xx 응답은 catch 블록으로 들어옵니다.
+        if (error.response && error.response.status === 404) {
+          // 404 Not Found는 데이터 없음으로 간주
+          setActualData({});
+        } else {
+          console.error("데이터 조회 오류:", error);
+          setActualData({});
+        }
+      }
+    };
+
+    fetchCurrentData();
+  }, [currentWeek]); // currentWeek가 바뀔 때마다 실행
+
+
+
 
   return (
     <div className={styles.body}>
@@ -72,14 +109,14 @@ const ChartIndex = () => {
                     menuList={menuList} activeMenu={activeMenu}
                     currentWeek={currentWeek}
                     standardData={currentStandardData}
-                    actualData={currentActualData}
+                    actualData={actualData}
                   />
                 ) : (
                   // activeMenu가 1 이상일 때 DetailChart가 렌더링됩니다.
                   <DetailChart menuList={menuList} activeMenu={activeMenu}
                     currentWeek={currentWeek}
                     standardData={currentStandardData}
-                    actualData={currentActualData}
+                    actualData={actualData}
                   />
                 )
               }
