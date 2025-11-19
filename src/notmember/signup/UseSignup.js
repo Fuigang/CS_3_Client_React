@@ -74,6 +74,7 @@ function useSignup(navigate) {
             .then(resp => {
                 alert("이메일 인증번호 발송 완료");
                 setServerAuthCode(resp.data);
+                console.log(resp.data);
             })
             .catch(err => console.log(err));
     }

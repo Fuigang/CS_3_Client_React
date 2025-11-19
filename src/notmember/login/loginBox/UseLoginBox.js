@@ -1,0 +1,47 @@
+import { useState } from "react";
+import { caxios } from "../../../config/config";
+import useAuthStore from "../../../store/useStore";
+import { useNavigate } from "react-router-dom";
+
+function useLoginBox(setBabySeq) {
+    // 로그인 준비
+    const login = useAuthStore((state) => state.login);
+    const navigate = useNavigate();
+
+    // 값 받을 준비
+    const [data, setData] = useState({ id: "", pw: "" });
+    // 로그인 실패 css 상태변수
+    const [authAlert, setauthAlert] = useState(false);
+
+    // 핸들러
+    const handleChange = (e) => {
+        setauthAlert(prev => false);
+        const { name, value } = e.target;
+        setData(prev => ({ ...prev, [name]: value }));
+    }
+
+    // 로그인 버튼 클릭시
+    const handleComplete = () => {
+        if (!data.id || !data.pw) return;
+
+        caxios.post("/user/login", { user_id: data.id, password: data.pw })
+            .then(resp => {
+                console.log(resp)
+                const babyseq = Number(resp.data.babySeq);
+                login(resp.data.token, data.id);
+                setBabySeq(babyseq);
+                navigate("/");
+            })
+            .catch(err => {
+                alert("아이디 또는 비밀번호가 일치하지않습니다.");
+                setData(prev => ({ ...prev, pw: "" }));
+                setauthAlert(prev => !prev);
+                console.log(err);
+            });
+    }
+
+    return {
+        data, authAlert, handleChange, handleComplete
+    }
+}
+export default useLoginBox;

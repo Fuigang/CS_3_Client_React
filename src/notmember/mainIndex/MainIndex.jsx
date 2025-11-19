@@ -9,12 +9,14 @@ import DiaryIndex from "../../member/diaryIndex/DiaryIndex";
 import BoardIndex from "../boardIndex/BoardIndex";
 import ParentInfoIndex from "../../member/parentInfoIndex/ParentInfoIndex";
 import styles from "./MainIndex.module.css";
+import useAuthStore from "../../store/useStore";
+import ChooseType from "../../member/chooseType/ChooseType";
 
 //메인 인덱스 페이지
 //여기서 로그인 여부에 따라서 보이고 안보이는게 다르게 만들어야함
 // "/"밑으로 들어가느 라우팅
-const MainIndex = ({ isLogin }) => {
-
+const MainIndex = ({babySeq}) => {
+  const isLogin = useAuthStore((state) => state.login);
   
   return (
     <div className={styles.container}>
@@ -22,12 +24,17 @@ const MainIndex = ({ isLogin }) => {
       {/*컨테이너 영역*/}
       {/*헤더 영역 : 필요시 로그인 여부 데이터 넘겨서 display none 사용하세요*/}
       <header className={styles.MemberHeader}>
-        <CommonHeader isLogin={isLogin} />
+        <CommonHeader />
       </header>
       {/*바디 영역 : 필요시 로그인 여부 데이터 넘겨서 display none 사용하세요*/}
       <div className={styles.layoutMain}>
         <Routes>
-          <Route path="" element={!isLogin ? <Information /> : <BabyIndex />} />{" "}
+          <Route path="" element={!isLogin ?
+            <Information /> 
+            : ( babySeq === 0 
+                ? <ChooseType />
+                : <BabyIndex />
+            )} />{" "}
           {/*로그인 안되어 있으면 ? 인포메이션 : 되면 베이비인덱스*/}
           <Route path="board/*" element={<BoardIndex />} /> {/*커뮤니티*/}
           {/*-----------------------------------------------------------------------여기까지는 비회원도 접근 가능한 부분 아래는 불가하게 막아야함*/}

@@ -3,9 +3,12 @@ import styles from "./ChooseType.module.css";
 import babyImg from "./img/baby.png";
 import childrenImg from "./img/children.png";
 import addImg from "./img/Add.png";
+import useAuthStore from "../../store/useStore";
 
 // 최초 로그인 시 임신 / 육아 둘중에 고르는 부분
-const ChooseType=()=>{
+const ChooseType = () => {
+    const isLogin = useAuthStore((state) => state.isLogin);
+
     const [showNewDiv, setShowNewDiv] = useState(false);      // 임산모 상세 화면
     const [showNewDivTwo, setShowNewDivTwo] = useState(false); // 육아 상세 화면
     const [inputBlocks, setInputBlocks] = useState([{}]); // 입력 블록 관리
@@ -22,6 +25,8 @@ const ChooseType=()=>{
             clickplusRef.current.scrollTop = clickplusRef.current.scrollHeight;
         }
     }, [inputBlocks]);
+
+    if (!isLogin) return;
 
     return (
         <div
@@ -45,7 +50,7 @@ const ChooseType=()=>{
                             <p>아직 뱃속에 있어요</p>
                             <img src={babyImg} alt="baby" className={styles.babyImage} />
                             <button className={styles.bok} onClick={() => setShowNewDiv(true)}>
-                                완료
+                                선택
                             </button>
                         </div>
                     </div>
@@ -56,7 +61,7 @@ const ChooseType=()=>{
                             <p>태어났어요</p>
                             <img src={childrenImg} alt="children" className={styles.childrenImage} />
                             <button className={styles.bokk} onClick={() => setShowNewDivTwo(true)}>
-                                완료
+                                선택
                             </button>
                         </div>
                     </div>
@@ -85,6 +90,7 @@ const ChooseType=()=>{
                         <div className={styles.clickplus} ref={clickplusRef}>
                             {inputBlocks.map((_, idx) => (
                                 <div key={idx} style={{ width: "100%" }}>
+                                    {/* {idx > 0 ? <div>{idx}번째 아이</div> : ""} */}
                                     <div className={styles.buttons}>
                                         <button className={styles.why}>미정?</button>
                                         <button className={styles.man}>남자</button>
