@@ -1,6 +1,7 @@
 // useBoardList.js
 import { useEffect, useState } from "react";
 import { caxios } from "../../../config/config";
+import { useNavigate } from "react-router-dom";
 
 const CATEGORY_MAP = {
     "전체": "all",
@@ -23,7 +24,7 @@ async function getThumbUrl(sysname) {
 }
 
 export function UseBoardList() {
-
+    const navigate = useNavigate();
 
     // ----------- 필터 버튼 상태변수-----------
     const [typeBtn, setTypeBtn] = useState("all");
@@ -39,36 +40,57 @@ export function UseBoardList() {
     const [count, setCount] = useState();
 
     // ----------- 검색용 상탭변수 -----------
-    const [findTarget, setFindTarget] = useState();
-    const [isSearching, setIsSearching] = useState();
+    const [findTarget, setFindTarget] = useState("");
+    const [isSearching, setIsSearching] = useState(false);
 
+
+    // ----------- 컨텐츠 내용 임시 파싱하기 -----------
+    const getPreviewText = (content) => { // 스트링으로 감싸진 json을 다시 json형식으로 파싱시키기
+        try {
+            const json = JSON.parse(content);
+            return extractTextFromContent(json);
+        } catch (e) {
+            console.error("content 파싱 실패:", content);
+            return "";
+        }
+    };
+
+    const extractTextFromContent = (node) => { //json을 현재 노드가 text 키값 가지고 있다면 반환시키도록
+        if (!node) return "";
+        let text = "";
+        if (node.type === "text") {
+            return node.text;
+        }
+        if (node.content && Array.isArray(node.content)) {
+            node.content.forEach(child => {
+                text += extractTextFromContent(child);
+            });
+        }
+        return text;
+    };
 
     // ----------- 데이터 서버에서 받아오기 -----------
     useEffect(() => {
-    Object.values(thumbsUrlMap).forEach(url => URL.revokeObjectURL(url));
-
-    async function load() {
-
-        let resp;
-
-        if (isSearching && findTarget) {
-            resp = await caxios.get("/board", {
-                params: { target: findTarget, board_type: typeBtn, page: page }
-            });
-        } else {
-            // 기본 목록 요청
-            resp = await caxios.get("/board", {
-                params: { board_type: typeBtn, page: page }
-            });
+        Object.values(thumbsUrlMap).forEach(url => URL.revokeObjectURL(url));
+        async function load() {
+            let resp;
+            //검색중일 경우에는 검색 api 호출
+            if (isSearching && findTarget) {
+                resp = await caxios.get("/board", {
+                    params: { target: findTarget, board_type: typeBtn, page: page }
+                });
+                //아니면 기본 목록
+            } else {
+                resp = await caxios.get("/board", {
+                    params: { board_type: typeBtn, page: page }
+                });
+            }
+            await processBoardData(resp.data);
         }
+        load();
+    }, [typeBtn, page, findTarget]);
 
-        await processBoardData(resp.data);
-    }
 
-    load();
-}, [typeBtn, page, findTarget]);
-
-    
     // ----------- 데이터 처리후 setMergedList 넣는 함수-----------    
     async function processBoardData(data) {
         setTotalCount(data.totalCount);
@@ -79,22 +101,36 @@ export function UseBoardList() {
         const thumbsMap = new Map();
         thumbs.forEach(t => thumbsMap.set(t.target_seq, t));
 
-        const merged = data.boards.map(b => ({
-            board: b,
-            thumb: thumbsMap.get(b.board_seq) || null,
-        }));
+        //게시물 비어있으면 바로 나가도록
+        if (!data.boards) {
+            setMergedList([]);
+            setThumbsUrlMap({});
+            return;
+        }
+
+        const merged = data.boards.map(b => {
+            const preview = getPreviewText(b.content);
+            console.log(preview)
+            console.log(typeof b.content)
+            return {
+                board: b,
+                thumb: thumbsMap.get(b.board_seq) || null,
+                preview
+            }
+        }
+        );
         setMergedList(merged);
 
         const urls = {};
         for (const item of merged) {
             if (item.thumb) {
-            urls[item.board.board_seq] = await getThumbUrl(item.thumb.sysname);
+                urls[item.board.board_seq] = await getThumbUrl(item.thumb.sysname);
             }
         }
         setThumbsUrlMap(urls);
-        }
+    }
 
-    
+
     // ----------- 버튼 onclick -----------
     const handleTopBtn = (cat) => {
         setActiveCategory(cat);
@@ -116,14 +152,14 @@ export function UseBoardList() {
 
     const handleSendFindTarget = (e) => {
         setIsSearching(true);
-    caxios.get("/board", {
-        params: { target: findTarget, board_type: typeBtn, page: 1 }
-    })
-    .then(resp => {
-        console.log("검색하고 나온 응답", resp);
-        setPage(1);
-        processBoardData(resp.data);
-    });
+        caxios.get("/board", {
+            params: { target: findTarget, board_type: typeBtn, page: 1 }
+        })
+            .then(resp => {
+                console.log("검색하고 나온 응답", resp);
+                setPage(1);
+                processBoardData(resp.data);
+            });
     };
 
     const clearSearch = () => {
@@ -137,8 +173,12 @@ export function UseBoardList() {
         }).then(resp => {
             processBoardData(resp.data);
         });
-        };
-
+    };
+    // 글작성 버튼 클릭 시 이동 함수
+    const toWrite = () => {
+        console.log("글작성 페이지로 이동!");
+        navigate("/board/write");
+    };
 
 
     return {
@@ -152,9 +192,10 @@ export function UseBoardList() {
         mergedList,
         thumbsUrlMap,
         isSearching,
-        findTarget,        
-        
-        
+        findTarget,
+
+
+        toWrite,
         setPage,
         handleTopBtn,
         handleCardClick,

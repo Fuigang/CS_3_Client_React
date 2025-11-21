@@ -29,6 +29,7 @@ const BoardList = () => {
     isSearching,
     findTarget,
 
+    toWrite,
     setPage,
     handleTopBtn,
     handleCardClick,
@@ -43,102 +44,119 @@ const BoardList = () => {
 
       {/* 카테고리 */}
       <div className={styles.header}>
-        <div className={styles.categoryList}>
-          {Object.keys(CATEGORY_MAP).map(cat => (
-            <button
-              key={cat}
-              className={`${styles.categoryItem} ${
-                activeCategory === cat ? styles.active : ""
-              }`}
-              onClick={() => handleTopBtn(cat)}
-            >
-              {cat}
-            </button>
-          ))}
+        {/* 왼쪽 그룹: 카테고리 */}
+        <div className={styles.leftGroup}>
+          <div className={styles.categoryList}>
+            {Object.keys(CATEGORY_MAP).map(cat => (
+              <button
+                key={cat}
+                className={`${styles.categoryItem} ${activeCategory === cat ? styles.active : ""
+                  }`}
+                onClick={() => handleTopBtn(cat)}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className={styles.searchBar}>
-          <input
-            className={styles.searchInput}
-            placeholder="제목을 입력하세요"
-            value={findTarget}
-            onChange={handleFindTarget}
-          />
-
-        {isSearching ? (
-          // X 아이콘
-          <X
-            className={styles.searchIcon}
-            size={24}
-            onClick={clearSearch} // 검색 리셋 함수
-          />
-        ) : (
-          // 돋보기 아이콘
-          <Search
-            className={styles.searchIcon}
-            size={24}
-            onClick={handleSendFindTarget} // 검색 실행
-          />
-        )}
-      </div>
-
-
+        {/* 오른쪽 그룹: 글작성 버튼 + 검색창 */}
+        <div className={styles.rightGroup}>
+          <button className={styles.writeButton} onClick={toWrite}>
+            글 작성
+          </button>
+          <div className={styles.searchBar}>
+            <input
+              type="text"
+              placeholder="제목을 입력하세요"
+              className={styles.searchInput}
+              value={findTarget}
+              onChange={handleFindTarget}
+              disabled={isSearching}
+            />
+            {isSearching ? (
+              // X 아이콘
+              <X
+                className={styles.searchIcon}
+                size={24}
+                onClick={clearSearch} // 검색 리셋 함수
+              />
+            ) : (
+              // 돋보기 아이콘
+              <Search
+                className={styles.searchIcon}
+                size={24}
+                onClick={handleSendFindTarget} // 검색 실행
+              />
+            )}
+          </div>
+        </div>
       </div>
 
       {/* 리스트 */}
       <div className={styles.cardGrid}>
-        <ul className={styles.gridContainer}>
-          {mergedList.map((item) => (
-            <li
-              key={item.board.board_seq}
-              className={styles.card}
-              onClick={() => handleCardClick(item.board.board_seq)}
-            >
-              <div className={styles.cardHeader}>
-                <img
-                  src={thumbsUrlMap[item.board.board_seq]}
-                  alt=""
-                  className={styles.cardImage}
-                />
+        {mergedList.length === 0 ? (
 
-                <button className={styles.menuBtn} onClick={handleMenuClick}>
-                  <MoreHorizontal size={24} />
-                </button>
-              </div>
+          //게시글 존재하지 않을때
+          <div className={styles.emptyMessage}>
+            게시글이 존재하지 않습니다
+          </div>
+        ) : (
 
-              <div className={styles.content}>
-                <div className={styles.textGroup}>
-                  <span
-                    className={`${styles.categoryTag} ${
-                      styles[CATEGORY_MAP_REVERSE[item.board.board_type]]
-                    }`}
-                  >
-                    {CATEGORY_MAP_REVERSE[item.board.board_type]}
-                  </span>
+          //게시글 존재할 때
+          <ul className={styles.gridContainer}>
+            {mergedList.map((item) => (
+              <li
+                key={item.board.board_seq}
+                className={styles.card}
+                onClick={() => handleCardClick(item.board.board_seq)}
+              >
+                <div className={styles.cardHeader}>
+                  <img
+                    src={thumbsUrlMap[item.board.board_seq]}
+                    alt=""
+                    className={styles.cardImage}
+                  />
 
-                  <h3 className={styles.title}>{item.board.title}</h3>
-                  <p className={styles.description}>{item.board.content}</p>
+                  <button className={styles.menuBtn} onClick={handleMenuClick}>
+                    <MoreHorizontal size={24} />
+                  </button>
                 </div>
 
-                <div className={styles.stats}>
-                  <div className={styles.statItem}>
-                    <Eye size={16} />
-                    <span>{item.board.view_count}</span>
+                <div className={styles.content}>
+                  <div className={styles.textGroup}>
+                    <span
+                      className={`${styles.categoryTag} ${styles[CATEGORY_MAP_REVERSE[item.board.board_type]]
+                        }`}
+                    >
+                      {CATEGORY_MAP_REVERSE[item.board.board_type]}
+                    </span>
+
+                    <h3 className={styles.title}>{item.board.title}</h3>
+                    <p className={styles.description}>{item.preview}</p>
                   </div>
-                  <div className={styles.statItem}>
-                    <MessageCircle size={16} />
-                    <span>댓글수 넣기</span>
+
+                  <div className={styles.stats}>
+                    <div className={styles.statItem}>
+                      <Eye size={16} />
+                      <span>{item.board.view_count}</span>
+                    </div>
+                    <div className={styles.statItem}>
+                      <MessageCircle size={16} />
+                      <span>댓글수 넣기</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        )}
+
       </div>
 
       {/* 페이지네이션은 나중에 분리 가능 */}
       <div className={styles.pagination}>
-        <PageNaviBar page={page} setPage={setPage} count={count} totalCount={totalCount} typeBtn={typeBtn}/>
+        <PageNaviBar page={page} setPage={setPage} count={count} totalCount={totalCount} typeBtn={typeBtn} />
       </div>
     </div>
   );
