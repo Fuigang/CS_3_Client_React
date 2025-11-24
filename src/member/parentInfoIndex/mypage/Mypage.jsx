@@ -4,7 +4,7 @@ import useMypage from "./UseMypage"; // 첫 글자 대문자로
 const Mypage = () => {
   const [isEditing, setIsEditing] = useState(false); // 수정 상태변수
 
-  const {data} =useMypage();
+  const { data } = useMypage();
 
   return (
     <div className={styles.container}>
@@ -35,7 +35,6 @@ const Mypage = () => {
                     중복확인
                   </button>
                 </div>
-
               ) : (
                 <div className={styles.dbValue}>맘마미아</div>
               )}
@@ -66,7 +65,6 @@ const Mypage = () => {
                     className={styles.verificationInput}
                   />
                 </>
-
               ) : (
                 <div className={styles.dbValue}>mosque@gmail.com</div>
               )}
