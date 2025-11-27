@@ -1,20 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./DiaryWrite.module.css";
+import { UseDiaryWrite } from "./UseDiaryWrite";
+import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 
 const DiaryWrite = () => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const {
+    title,
+    setTitle,
+    content,
+    handleComplete
 
+  } = UseDiaryWrite();
   const navigate = useNavigate();
 
-  const handleComplete = () => {
-    if (!title.trim()) return alert("제목을 입력해주세요");
-
-    // 완료 시 이동할 공간
-
-    navigate(-1);
-  };
 
   return (
     <div className={styles.container}>
@@ -35,15 +34,7 @@ const DiaryWrite = () => {
       {/* 글 작성 */}
       <label className={styles.formLabel}>글 작성</label>
       <div className={styles.editorArea}>
-        <div className={styles.editorHeader}>
-          <span className={styles.editorLabel}>에디터 위치</span>
-        </div>
-        <textarea
-          placeholder="내용을 입력하세요..."
-          className={styles.editorInput}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
+        <SimpleEditor />
       </div>
 
       {/* 버튼 */}
