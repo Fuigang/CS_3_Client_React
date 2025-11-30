@@ -13,7 +13,7 @@ export const submitChartData = async ({ inputs, date, babySeq, id, measureTypes 
       measure_value: type === "EFW" ? parseFloat(value) * 1000 : parseFloat(value),
     }));
 
-
+console.log("payload", JSON.stringify(payload));
   try {
     const res = await caxios.post("/chart/insert", payload);
     alert("저장 완료!");

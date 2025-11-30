@@ -3,7 +3,7 @@ import styles from "./ChartInput.module.css";
 import { submitChartData } from "./UseChartInput"; // JS 분
 import useAuthStore from "../../../store/useStore";
 
-const ChartInput = ({ menuList, activeMenu, currentWeek, inputs, setInputs, actualData, measureTypes }) => {
+const ChartInput = ({ menuList, activeMenu, currentWeek, inputs, setInputs, actualData,fetchActualData, measureTypes }) => {
   const activeItem = menuList[activeMenu];
   const [isEditing, setIsEditing] = useState(false);
 
@@ -13,7 +13,13 @@ const ChartInput = ({ menuList, activeMenu, currentWeek, inputs, setInputs, actu
   const [date, setDate] = useState("");
 
   const { id, babySeq } = useAuthStore();
-
+  const REQUIRED_KEYS = [
+    "몸무게",
+    "머리직경",
+    "머리둘레",
+    "복부둘레",
+    "허벅지 길이"
+];
 
 
 
@@ -24,9 +30,9 @@ const ChartInput = ({ menuList, activeMenu, currentWeek, inputs, setInputs, actu
 
   const handleSubmit = async () => {
 
-    console.log("📌 현재 inputs:", inputs);
-    console.log("📌 현재 date:", date);
-    console.log("📌 빈값 체크 결과:", Object.keys(inputs).filter(key => !inputs[key]));
+    console.log(" 현재 inputs:", inputs);
+    console.log(" 현재 date:", date);
+    console.log(" 빈값 체크 결과:", Object.keys(inputs).filter(key => !inputs[key]));
 
 
 
@@ -36,20 +42,39 @@ const ChartInput = ({ menuList, activeMenu, currentWeek, inputs, setInputs, actu
       return;
     }
 
-    //미입력 필드 검사
-    const hasEmptyField = Object.values(inputs).some(
-      (value) => value === undefined || value === null || value === ""
-    );
+    const invalidInput = REQUIRED_KEYS.some((key) => {
+        const value = inputs[key];
+        
+        // 필수 키가 inputs에 없거나 (undefined), 값이 없거나, 숫자가 아니거나, 0 이하인 경우
+        return (
+            value === undefined ||             // 👈 inputs에 키 자체가 없는 경우 (허벅지 둘레 미입력 시)
+            value === null || 
+            value === "" ||
+            isNaN(Number(value)) ||
+            Number(value) <= 0
+        );
+    });
 
-    if (hasEmptyField) {
-      alert("입력되지 않은 항목이 있습니다.");
-      return;
+    if (invalidInput) {
+        alert("모든 필수 항목(" + REQUIRED_KEYS.join(', ') + ")을 올바르게 입력해주세요.");
+        return;
     }
+
+    // //미입력 필드 검사
+    // const hasEmptyField = Object.values(inputs).some(
+    //   (value) => value === undefined || value === null || value === ""
+    // );
+
+    // if (hasEmptyField) {
+    //   alert("입력되지 않은 항목이 있습니다.");
+    //   return;
+    // }
     //서버 전송
     const res = await submitChartData({ inputs, date, babySeq, id, measureTypes });
+
     if (res?.data) {
-      // 성공 시 차트 데이터 갱신
-      // ⬇ 부모 컴포넌트에서 setActualData 하도록 props로 받아 넣거나 or zustand로 처리
+
+      await fetchActualData(); 
       setIsEditing(false);
     }
   };
@@ -80,6 +105,11 @@ const ChartInput = ({ menuList, activeMenu, currentWeek, inputs, setInputs, actu
       }
 
       setDate(formattedDate);
+
+      if (actualData && Object.keys(actualData).length > 0) {
+    setIsEditing(false); // 완료 후 자동으로 수정 버튼으로 바뀌게
+  }
+
     }
   }, [actualData]);
 
@@ -115,8 +145,8 @@ const ChartInput = ({ menuList, activeMenu, currentWeek, inputs, setInputs, actu
                       onChange={(e) => handleChange(item, e.target.value)}
                       placeholder={item}
                     />
-                    <span className={styles.unit}>kg</span>
-                  </div>
+                    <span className={styles.unit}>kg</span> 
+                  </div>// 잠시 kg -> g으로 바꿔서 사용 >> 나중에 다바꿔야해서 편의상 g 사용해야할거같음
                 ) : (
                   <input
                     className={styles.input}

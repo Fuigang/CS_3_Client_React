@@ -11,6 +11,7 @@ import { useChartIndex } from "./UseChartIndex";
 import { fetalWeekStartEnd, infantWeekStartEnd } from "../utils/pregnancyUtils";
 const ChartIndex = () => {
   const [inputs, setInputs] = useState({});
+  const [actualData, setActualData] = useState({}); // 실제 입력 데이터 (API 응답)
   const measureTypes = {
     EFW: inputs["몸무게"],
     OFD: inputs["머리직경"],
@@ -38,7 +39,7 @@ const ChartIndex = () => {
   const [currentWeek, setCurrentWeek] = useState(0); // 현재 주차 상태
   const [activeMenu, setActiveMenu] = useState(0); // 활성 메뉴 인덱스
 
-  const [actualData, setActualData] = useState({}); // 실제 입력 데이터 (API 응답)
+  
 
   // 현재 모드에 따라 사용될 메뉴 리스트를 동적으로 결정
   const currentMenuList = isFetalMode ? fetalMenuList : babyMenuList;
@@ -64,10 +65,8 @@ const ChartIndex = () => {
   } = useChartIndex(currentWeek, setCurrentWeek);
 
 
-  useEffect(() => {
-    if (!babyInfo) return;
 
-    const fetchActualData = async () => {
+  const fetchActualData = async () => {
       if (!isFetalMode) {
         setActualData({}); // 육아 모드는 빈 객체
         return;
@@ -98,9 +97,13 @@ const ChartIndex = () => {
         setActualData({});
       }
     };
-
-    fetchActualData();
+  useEffect(() => {
+    if (babyInfo) fetchActualData();
   }, [babyInfo, currentWeek, isFetalMode]);
+
+
+
+
 
   useEffect(() => {
     if (actualData && Object.keys(actualData).length > 0) {
@@ -113,7 +116,7 @@ const ChartIndex = () => {
         "허벅지 길이": actualData.FL ?? "",
       };
       setInputs(mappedInputs);
-      console.log("✅ inputs 세팅 완료:", mappedInputs);
+      console.log(" inputs 세팅 완료:", mappedInputs);
     }
   }, [actualData]);
 
@@ -160,6 +163,7 @@ const ChartIndex = () => {
                     standardData={currentStandardData}
                     actualData={actualData}
                     isFetalMode={isFetalMode} // 모드 전달
+                    inputs={inputs}
                   />
                 ) : (
                   // activeMenu가 1 이상일 때 DetailChart가 렌더
@@ -189,6 +193,7 @@ const ChartIndex = () => {
             setInputs={setInputs}
             actualData={actualData}
             setActualData={setActualData}
+            fetchActualData={fetchActualData}
             measureTypes={measureTypes}
           />
         )}
