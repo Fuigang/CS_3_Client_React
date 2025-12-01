@@ -39,7 +39,7 @@ const ChartIndex = () => {
   const [currentWeek, setCurrentWeek] = useState(0); // 현재 주차 상태
   const [activeMenu, setActiveMenu] = useState(0); // 활성 메뉴 인덱스
 
-  
+
 
   // 현재 모드에 따라 사용될 메뉴 리스트를 동적으로 결정
   const currentMenuList = isFetalMode ? fetalMenuList : babyMenuList;
@@ -67,36 +67,36 @@ const ChartIndex = () => {
 
 
   const fetchActualData = async () => {
-      if (!isFetalMode) {
-        setActualData({}); // 육아 모드는 빈 객체
-        return;
+    if (!isFetalMode) {
+      setActualData({}); // 육아 모드는 빈 객체
+      return;
+    }
+
+    setActualData(null); // 로딩 시작
+
+    try {
+      const { babySeq, status, birthDate } = babyInfo;
+      const week = currentWeek;
+
+      let startDate, endDate;
+      if (status.toLowerCase() === "fetus") {
+        [startDate, endDate] = fetalWeekStartEnd(birthDate, week);
+      } else {
+        [startDate, endDate] = infantWeekStartEnd(birthDate, week);
       }
 
-      setActualData(null); // 로딩 시작
+      const response = await caxios.get(`/chart/total`, {
+        params: { babyId: babySeq, week, startDate, endDate },
+      });
 
-      try {
-        const { babySeq, status, birthDate } = babyInfo;
-        const week = currentWeek;
+      setActualData(response.data || {});
+      console.log("🟢 Actual Data 로딩 완료:", response.data);
 
-        let startDate, endDate;
-        if (status.toLowerCase() === "fetus") {
-          [startDate, endDate] = fetalWeekStartEnd(birthDate, week);
-        } else {
-          [startDate, endDate] = infantWeekStartEnd(birthDate, week);
-        }
-
-        const response = await caxios.get(`/chart/total`, {
-          params: { babyId: babySeq, week, startDate, endDate },
-        });
-
-        setActualData(response.data || {});
-        console.log("🟢 Actual Data 로딩 완료:", response.data);
-
-      } catch (error) {
-        console.error("Actual Data 조회 실패:", error);
-        setActualData({});
-      }
-    };
+    } catch (error) {
+      console.error("Actual Data 조회 실패:", error);
+      setActualData({});
+    }
+  };
   useEffect(() => {
     if (babyInfo) fetchActualData();
   }, [babyInfo, currentWeek, isFetalMode]);
@@ -162,6 +162,7 @@ const ChartIndex = () => {
                     currentWeek={currentWeek}
                     standardData={currentStandardData}
                     actualData={actualData}
+                    setActualData={setActualData}
                     isFetalMode={isFetalMode} // 모드 전달
                     inputs={inputs}
                   />
@@ -173,6 +174,7 @@ const ChartIndex = () => {
                     currentWeek={currentWeek}
                     standardData={currentStandardData}
                     actualData={actualData}
+                    setActualData={setActualData}
                     isFetalMode={isFetalMode} // 모드 전달
                     babyInfo={babyInfo}
 
@@ -188,6 +190,7 @@ const ChartIndex = () => {
           <ChartInput
             menuList={currentMenuList}
             activeMenu={activeMenu}
+            currentWeek={currentWeek}
             isFetalMode={isFetalMode}
             inputs={inputs}
             setInputs={setInputs}
