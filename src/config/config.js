@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-export const FILE_SERVER = "http://192.168.0.6";//파일서버 주소
+export const FILE_SERVER = "http://192.168.45.136";//파일서버 주소
 
 
 export const caxios = axios.create({
