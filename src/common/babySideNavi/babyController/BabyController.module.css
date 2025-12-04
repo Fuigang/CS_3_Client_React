@@ -40,6 +40,7 @@
   gap: 10px;
   overflow-x: auto;
   overflow-y: hidden;
+  -webkit-overflow-scrolling: touch; /* iOS 스크롤 부드럽게 */
 }
 
 /* --------------------------------------------------
@@ -111,9 +112,12 @@
   font-weight: bold;
 }
 
+/* 아기 이미지 수정 */
 .babyfaceImage {
   width: 50%;
-  height: 100%;
+  height: auto;      /* 비율 유지 */
+  max-height: 60%;   /* 부모 안에서 최대 높이 제한 */
+  object-fit: contain; /* 이미지 비율 유지 */
 }
 
 /* --------------------------------------------------
@@ -283,7 +287,6 @@
   width: 100%;
 }
 
-/* 리스트 전체 */
 .sidebarContainer .babyclick {
   display: flex;
   flex-direction: column;
@@ -293,7 +296,6 @@
   padding: 8px 0;
 }
 
-/* 기본/선택된 아기 카드 공통 스타일 */
 .sidebarContainer .ingbaby,
 .sidebarContainer .ingbaby1 {
   display: flex;
@@ -310,14 +312,12 @@
   box-sizing: border-box;
 }
 
-/* 선택된 아기 강조 */
 .sidebarContainer .ingbaby1 {
   border: 2px solid var(--color-primary);
   background: var(--color-sud-color1);
   height: 90px;
 }
 
-/* 사이드바일 때 내부 bbb 구조도 가로로 전환 */
 .sidebarContainer .bbb {
   display: flex;
   flex-direction: row !important;
@@ -325,7 +325,6 @@
   gap: 16px;
 }
 
-/* 아기 이미지 */
 .sidebarContainer .bbb img {
   width: 55px;
   height: 55px;
@@ -333,36 +332,31 @@
   border-radius: 50%;
 }
 
-/* 이름/텍스트 박스 */
 .sidebarContainer .bbb > div {
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-/* 이름 텍스트 */
 .sidebarContainer .babyname {
   font-size: 16px;
   color: #333;
 }
 
-/* 'how' 텍스트 숨김 */
 .sidebarContainer .how {
   font-size: 14px;
   font-weight: 500;
   color: #333;
 }
 
-/* hover */
 .sidebarContainer .ingbaby:hover,
 .sidebarContainer .plusbb:hover {
   border: 2px solid var(--color-primary);
   background-color: var(--color-sud-color1);
-  transform: scaleY(1.08); /* 세로 5% 확대 */
+  transform: scaleY(1.08);
   transition: transform 0.3s ease;
 }
 
-/* 모달 동일 유지 */
 .sidebarContainer .modal {
   position: fixed;
   top: 0;
@@ -375,3 +369,110 @@
   align-items: center;
   z-index: 1000;
 }
+
+/*------------------------------------------------*/
+
+/* ==============================
+   반응형 미디어쿼리
+   ============================== */
+
+/* 작은 모바일 (320px ~ 375px) */
+@media (max-width: 375px) {
+  .babyclick {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: space-between;
+    gap: 6%;
+    padding: 0 0%;
+  }
+  .ingbaby, .ingbaby1, .plusbb {
+    flex: 1 1 45%;
+    min-width: 45%;
+  }
+  .bbb { gap: 10%; }
+  .babyname { font-size: 12px; }
+  .how { font-size: 10px; }
+  .babyfaceImage {
+    width: 40%;
+    height: auto;
+    max-height: 100%;
+  }
+}
+
+/* 일반 모바일 (376px ~ 414px) */
+@media (min-width: 376px) and (max-width: 414px) {
+  .babyclick {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: space-between;
+    gap: 5%;
+    padding: 0 4%;
+    
+  }
+  .ingbaby, .ingbaby1, .plusbb {
+    flex: 1 1 42%;
+    min-width: 30%;
+  }
+  .bbb { gap: 8%; }
+  .babyname { font-size: 13px; }
+  .how { font-size: 11px; }
+  .babyfaceImage { width: 42%; height: auto; max-height: 100%; }
+}
+
+/* 작은 태블릿 / 대형폰 (415px ~ 600px) */
+@media (min-width: 415px) and (max-width: 600px) {
+  .babyclick {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: space-between;
+    gap: 4%;
+    padding: 0 0%;
+  }
+  .ingbaby, .ingbaby1, .plusbb {
+    flex: 1 1 40%;
+    min-width: 30%;
+  }
+  .bbb { gap: 6%; }
+  .babyname { font-size: 14px; }
+  .how { font-size: 12px; }
+  .babyfaceImage { width: 45%; height: auto; max-height: 100%; }
+}
+
+/* 일반 태블릿 (601px ~ 900px) */
+@media (min-width: 601px) and (max-width: 900px) {
+  .babyclick {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: space-between;
+    gap: 3%;
+    padding: 0 3%;
+  }
+  .ingbaby, .ingbaby1, .plusbb {
+    flex: 1 1 30%;
+    min-width: 30%;
+  }
+  .bbb { gap: 5%; }
+  .babyname { font-size: 16px; }
+  .how { font-size: 14px; }
+  .babyfaceImage { width: 45%; height: auto; max-height: 100%; }
+}
+
+/* 큰 태블릿 / 작은 PC (901px ~ 1200px) */
+@media (min-width: 901px) and (max-width: 1200px) {
+  .babyclick {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: space-between;
+    gap: 2.5%;
+    padding: 0 2.5%;
+  }
+  .ingbaby, .ingbaby1, .plusbb {
+    flex: 1 1 22%;
+    min-width: 22%;
+  }
+  .bbb { gap: 4%; }
+  .babyname { font-size: 18px; }
+  .how { font-size: 15px; }
+  .babyfaceImage { width: 45%; height: auto; max-height: 100%; }
+}
+
