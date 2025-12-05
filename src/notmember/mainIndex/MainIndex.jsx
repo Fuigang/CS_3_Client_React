@@ -43,14 +43,21 @@ const MainIndex = ({ alerts, setAlerts, newAlerts, setNewAlerts }) => {
   // 경로 변화 감지
   useEffect(() => {
     if (!isLogin) return;
-    const paths = ["/board", "/mypage", "/babymypage", "/checklist", "/chart", "/diary"];
+    const paths = [
+      "/board",
+      "/mypage",
+      "/babymypage",
+      "/checklist",
+      "/chart",
+      "/diary",
+    ];
     console.log("현재 path:", location.pathname);
-    if (paths.some(path => location.pathname.startsWith(path))) {
-      caxios.post("/dashCart", { path: location.pathname })
-        .catch(err => console.log(err));
+    if (paths.some((path) => location.pathname.startsWith(path))) {
+      caxios
+        .post("/dashCart", { path: location.pathname })
+        .catch((err) => console.log(err));
     }
   }, [location, isLogin]);
-
 
   // 로딩 중이면 화면 전체 로딩 표시
   if (isLoading) {
